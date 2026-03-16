@@ -7,12 +7,17 @@
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #0a0015 url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=2072') center/cover fixed;
+      background: #0a0015; /* plain dark space/Mars tone, no image */
       color: #e8e0ff;
       margin: 0;
       padding: 20px;
     }
-    h1 { color: #ff8c00; text-align: center; text-shadow: 0 0 15px #ff4500; }
+    h1 { 
+      color: #ff8c00; 
+      text-align: center; 
+      text-shadow: 0 0 15px #ff4500; 
+      margin-bottom: 20px;
+    }
     #stats {
       background: rgba(30, 10, 50, 0.75);
       padding: 15px;
@@ -24,7 +29,10 @@
       gap: 20px;
       justify-content: center;
     }
-    #controls { text-align: center; margin: 20px 0; }
+    #controls { 
+      text-align: center; 
+      margin: 20px 0; 
+    }
     button {
       background: #4b2e00;
       color: #fff;
@@ -54,9 +62,19 @@
       border-radius: 10px;
       transition: all 0.4s;
     }
-    .plot.growing { background: rgba(0, 100, 0, 0.5); border-color: #2e8b57; }
-    .plot.ready { background: rgba(139, 69, 19, 0.7); border-color: #deb887; animation: glow 3s infinite alternate; }
-    @keyframes glow { from { box-shadow: 0 0 10px #ffd700; } to { box-shadow: 0 0 25px #ff8c00; } }
+    .plot.growing { 
+      background: rgba(0, 100, 0, 0.5); 
+      border-color: #2e8b57; 
+    }
+    .plot.ready { 
+      background: rgba(139, 69, 19, 0.7); 
+      border-color: #deb887; 
+      animation: glow 3s infinite alternate; 
+    }
+    @keyframes glow { 
+      from { box-shadow: 0 0 10px #ffd700; } 
+      to { box-shadow: 0 0 25px #ff8c00; } 
+    }
     #log {
       background: rgba(0,0,0,0.7);
       padding: 15px;
@@ -96,76 +114,91 @@
 
   <div id="log">Loading TypeScript game... (using browser compiler)</div>
 
-  <!-- esbuild-wasm for in-browser TS → JS -->
-  <script src="https://unpkg.com/esbuild-wasm@0.23.0/esm/browser.js"></script>
-<!-- Load esbuild-wasm correctly as module (no syntax error) -->
-<script type="module">
-  // Import esbuild directly from CDN as ESM module
-  import * as esbuild from 'https://unpkg.com/esbuild-wasm@0.23.0/esm/browser.js';
+  <!-- All esbuild + game loading logic here -->
+  <script type="module">
+    import * as esbuild from 'https://unpkg.com/esbuild-wasm@0.23.0/esm/browser.js';
 
-  // Initialize once (must await!)
-  try {
-    await esbuild.initialize({
-      wasmURL: 'https://unpkg.com/esbuild-wasm@0.23.0/esbuild.wasm',
-      worker: false  // Run in main thread for simplicity (no extra worker issues)
-    });
-    logMessage("esbuild initialized successfully!");
-  } catch (err) {
-    logMessage('<span style="color:red">Initialization failed: ' + err.message + '</span>');
-    console.error(err);
-    return;
-  }
+    const logEl = document.getElementById('log');
 
-  // Now load and transpile your main TS file
-  try {
-    const response = await fetch('./src/main.ts');
-    if (!response.ok) throw new Error(`Failed to fetch src/main.ts: ${response.statusText}`);
+    function log(msg) {
+      if (logEl) {
+        logEl.innerHTML += '<br>' + msg;
+        logEl.scrollTop = logEl.scrollHeight;
+      }
+      console.log(msg);
+    }
 
-    const tsCode = await response.text();
+    log("Starting esbuild initialization...");
 
-    const result = await esbuild.transform(tsCode, {
-      loader: 'ts',
-      target: 'es2020',
-      format: 'esm'
-    });
+    try {
+      await esbuild.initialize({
+        wasmURL: 'https://unpkg.com/esbuild-wasm@0.23.0/esbuild.wasm',
+        worker: false
+      });
+      log("esbuild ready!");
+    } catch (err) {
+      log('<span style="color: red;">esbuild init failed: ' + err.message + '</span>');
+      console.error(err);
+      return;
+    }
 
-    if (result.errors?.length > 0) {
-      logMessage('<span style="color:red">Transpile errors: ' + result.errors[0].text + '</span>');
+    log("Fetching src/main.ts...");
+
+    let tsCode;
+    try {
+      const res = await fetch('./src/main.ts');
+      if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      tsCode = await res.text();
+      log("TS code fetched (" + tsCode.length + " chars)");
+    } catch (err) {
+      log('<span style="color: red;">Failed to load src/main.ts: ' + err.message + '</span>');
+      console.error(err);
+      return;
+    }
+
+    log("Transpiling TypeScript...");
+
+    let result;
+    try {
+      result = await esbuild.transform(tsCode, {
+        loader: 'ts',
+        target: 'es2020',
+        format: 'esm'
+      });
+    } catch (err) {
+      log('<span style="color: red;">Transform failed: ' + err.message + '</span>');
+      console.error(err);
+      return;
+    }
+
+    if (result.errors && result.errors.length > 0) {
+      log('<span style="color: red;">Transpile errors:</span><br>' + result.errors.map(e => e.text).join('<br>'));
       console.error(result.errors);
       return;
     }
 
-    // Execute the transpiled JS code
-    const blob = new Blob([result.code], { type: 'application/javascript' });
-    const url = URL.createObjectURL(blob);
-    const module = await import(url);
-
-    // Expose game actions globally for HTML onclick
-    window.game = module.game || module.default || module;  // flexible in case export style changes
-
-    logMessage("TypeScript game loaded & running! Click buttons to start farming.");
-
-    // Call init if present
-    if (typeof window.game?.init === 'function') window.game.init();
-  } catch (err) {
-    logMessage('<span style="color:red">Load/Transpile failed: ' + err.message + '</span>');
-    console.error(err);
-  }
-
-  function logMessage(msg) {
-    const logEl = document.getElementById('log');
-    if (logEl) {
-      logEl.innerHTML += '<br>' + msg;
-      logEl.scrollTop = logEl.scrollHeight;
+    if (!result.code) {
+      log('<span style="color: red;">No code output from transpile</span>');
+      return;
     }
-  }
-</script>
 
-  <script>
-    function log(msg) {
-      const el = document.getElementById('log');
-      el.innerHTML += '<br>' + msg;
-      el.scrollTop = el.scrollHeight;
+    log("Transpile success! Executing game code...");
+
+    try {
+      const blob = new Blob([result.code], { type: 'application/javascript' });
+      const url = URL.createObjectURL(blob);
+      const module = await import(url);
+
+      window.game = module.game || module.default || module;
+
+      log("Game loaded! You can now click buttons.");
+
+      if (window.game && typeof window.game.init === 'function') {
+        window.game.init();
+      }
+    } catch (err) {
+      log('<span style="color: red;">Execution failed: ' + err.message + '</span>');
+      console.error(err);
     }
   </script>
 
