@@ -98,41 +98,68 @@
 
   <!-- esbuild-wasm for in-browser TS → JS -->
   <script src="https://unpkg.com/esbuild-wasm@0.23.0/esm/browser.js"></script>
+<!-- Load esbuild-wasm correctly as module (no syntax error) -->
+<script type="module">
+  // Import esbuild directly from CDN as ESM module
+  import * as esbuild from 'https://unpkg.com/esbuild-wasm@0.23.0/esm/browser.js';
 
-  <script type="module">
-    // Initialize esbuild
-    await esbuild.initialize({ wasmURL: "https://unpkg.com/esbuild-wasm@0.23.0/esbuild.wasm", worker: false });
+  // Initialize once (must await!)
+  try {
+    await esbuild.initialize({
+      wasmURL: 'https://unpkg.com/esbuild-wasm@0.23.0/esbuild.wasm',
+      worker: false  // Run in main thread for simplicity (no extra worker issues)
+    });
+    logMessage("esbuild initialized successfully!");
+  } catch (err) {
+    logMessage('<span style="color:red">Initialization failed: ' + err.message + '</span>');
+    console.error(err);
+    return;
+  }
 
-    // Load and transpile main.ts (entry point)
+  // Now load and transpile your main TS file
+  try {
     const response = await fetch('./src/main.ts');
-    if (!response.ok) throw new Error("Could not load src/main.ts");
+    if (!response.ok) throw new Error(`Failed to fetch src/main.ts: ${response.statusText}`);
 
-    const tsSource = await response.text();
+    const tsCode = await response.text();
 
-    const { code, errors } = await esbuild.transform(tsSource, {
+    const result = await esbuild.transform(tsCode, {
       loader: 'ts',
       target: 'es2020',
       format: 'esm'
     });
 
-    if (errors.length > 0) {
-      document.getElementById('log').innerHTML += '<br><span style="color:red">Transpile errors: ' + errors[0].text + '</span>';
-      throw new Error("Transpile failed");
+    if (result.errors?.length > 0) {
+      logMessage('<span style="color:red">Transpile errors: ' + result.errors[0].text + '</span>');
+      console.error(result.errors);
+      return;
     }
 
-    // Execute the transpiled code via Blob + import
-    const blob = new Blob([code], { type: 'application/javascript' });
+    // Execute the transpiled JS code
+    const blob = new Blob([result.code], { type: 'application/javascript' });
     const url = URL.createObjectURL(blob);
     const module = await import(url);
 
-    // Expose the game object globally for buttons
-    window.game = module;
+    // Expose game actions globally for HTML onclick
+    window.game = module.game || module.default || module;  // flexible in case export style changes
 
-    // Init if exported
-    if (module.init) module.init();
+    logMessage("TypeScript game loaded & running! Click buttons to start farming.");
 
-    log("Game loaded successfully!");
-  </script>
+    // Call init if present
+    if (typeof window.game?.init === 'function') window.game.init();
+  } catch (err) {
+    logMessage('<span style="color:red">Load/Transpile failed: ' + err.message + '</span>');
+    console.error(err);
+  }
+
+  function logMessage(msg) {
+    const logEl = document.getElementById('log');
+    if (logEl) {
+      logEl.innerHTML += '<br>' + msg;
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+  }
+</script>
 
   <script>
     function log(msg) {
