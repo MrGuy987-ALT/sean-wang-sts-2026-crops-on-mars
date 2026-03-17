@@ -1,7 +1,6 @@
-// src/main.ts - Self-contained game (no imports needed)
+// src/main.ts - Fully self-contained, no imports, no relative paths
 
-// ================================================
-// TUNABLES - Change these!
+// TUNABLES
 const DAYS_PER_TICK = 4;
 const TICK_INTERVAL_MS = 250;
 
@@ -20,7 +19,7 @@ const SHIELD_REPAIR_AMOUNT = 35;
 
 const ROVER_SOIL_BOOST = 18;
 
-// Crop definitions
+// Crops (object instead of interface for simplicity)
 const CROPS = {
   Radish:   { name: "Radish",   daysToGrow: 25, yield: 12, value: 60 },
   Lettuce:  { name: "Lettuce",  daysToGrow: 45, yield: 18, value: 90 },
@@ -28,7 +27,7 @@ const CROPS = {
 };
 
 // Game state
-let state = {
+const state = {
   day: 1,
   money: START_MONEY,
   food: START_FOOD,
@@ -36,45 +35,58 @@ let state = {
   powerRegen: START_POWER_REGEN,
   shield: START_SHIELD,
   soilAvg: START_SOIL_AVG,
-  plots: Array(PLOT_COUNT_START).fill({ cropName: undefined, progress: 0 }),
+  plots: Array(PLOT_COUNT_START).fill(null).map(() => ({ cropName: undefined, progress: 0 })),
   paused: false
 };
 
-// UI update
+// Safe UI update with null checks
 function updateUI() {
-  document.getElementById('day').textContent = state.day;
-  document.getElementById('money').textContent = state.money;
-  document.getElementById('food').textContent = state.food;
-  document.getElementById('water').textContent = state.water;
-  document.getElementById('power').textContent = state.powerRegen;
-  document.getElementById('shield').textContent = Math.floor(state.shield);
-  document.getElementById('soil').textContent = Math.floor(state.soilAvg);
-
+  const dayEl = document.getElementById('day');
+  const moneyEl = document.getElementById('money');
+  const foodEl = document.getElementById('food');
+  const waterEl = document.getElementById('water');
+  const powerEl = document.getElementById('power');
+  const shieldEl = document.getElementById('shield');
+  const soilEl = document.getElementById('soil');
   const plotsEl = document.getElementById('plots');
-  plotsEl.innerHTML = '';
-  state.plots.forEach(plot => {
-    const div = document.createElement('div');
-    div.className = 'plot';
-    if (plot.cropName) {
-      const crop = CROPS[plot.cropName];
-      const pct = Math.min(100, Math.floor((plot.progress / crop.daysToGrow) * 100));
-      div.textContent = `${crop.name} (${pct}%)`;
-      if (pct >= 100) div.classList.add('ready');
-      else div.classList.add('growing');
-    } else {
-      div.textContent = 'Empty';
-    }
-    plotsEl.appendChild(div);
-  });
+
+  if (dayEl) dayEl.textContent = state.day.toString();
+  if (moneyEl) moneyEl.textContent = state.money.toString();
+  if (foodEl) foodEl.textContent = state.food.toString();
+  if (waterEl) waterEl.textContent = state.water.toString();
+  if (powerEl) powerEl.textContent = state.powerRegen.toString();
+  if (shieldEl) shieldEl.textContent = Math.floor(state.shield).toString();
+  if (soilEl) soilEl.textContent = Math.floor(state.soilAvg).toString();
+
+  if (plotsEl) {
+    plotsEl.innerHTML = '';
+    state.plots.forEach((plot) => {
+      const div = document.createElement('div');
+      div.className = 'plot';
+      if (plot.cropName && CROPS[plot.cropName]) {
+        const crop = CROPS[plot.cropName];
+        const pct = Math.min(100, Math.floor((plot.progress / crop.daysToGrow) * 100));
+        div.textContent = `${crop.name} (${pct}%)`;
+        if (pct >= 100) {
+          div.classList.add('ready');
+        } else {
+          div.classList.add('growing');
+        }
+      } else {
+        div.textContent = 'Empty';
+      }
+      plotsEl.appendChild(div);
+    });
+  }
 }
 
-// Actions (exported for window.game)
+// Actions
 function plant(cropName) {
-  if (!CROPS[cropName]) return;
-  const empty = state.plots.find(p => !p.cropName);
-  if (empty) {
-    empty.cropName = cropName;
-    empty.progress = 0;
+  if (!CROPS[cropName]) return;  // safe check
+  const emptyPlot = state.plots.find(p => !p.cropName);
+  if (emptyPlot) {
+    emptyPlot.cropName = cropName;
+    emptyPlot.progress = 0;
     updateUI();
   }
 }
@@ -96,15 +108,15 @@ function togglePause() {
   state.paused = !state.paused;
 }
 
-// Game tick
+// Tick loop
 function tick() {
   if (state.paused) return;
 
   state.day += DAYS_PER_TICK;
 
-  // Crop growth & harvest
+  // Grow crops
   state.plots.forEach(p => {
-    if (p.cropName) {
+    if (p.cropName && CROPS[p.cropName]) {
       p.progress += DAYS_PER_TICK;
       const crop = CROPS[p.cropName];
       if (p.progress >= crop.daysToGrow) {
@@ -116,20 +128,20 @@ function tick() {
     }
   });
 
-  // Simple drains
+  // Drains / regens (example)
   state.shield = Math.max(0, state.shield - SHIELD_DRAIN_PER_DAY * DAYS_PER_TICK);
-  state.water -= 8 * DAYS_PER_TICK; // example
+  state.water -= 8 * DAYS_PER_TICK;
 
   updateUI();
 }
 
-// Start loop
+// Start
 setInterval(tick, TICK_INTERVAL_MS);
 
-// Initial UI
+// Initial draw
 updateUI();
 
-// Export for index.html
+// Export for window.game
 export const game = {
   plant,
   sendRover,
