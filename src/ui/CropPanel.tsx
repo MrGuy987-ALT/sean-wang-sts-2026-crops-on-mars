@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useGameStore } from '../game/GameLoop'
-import { CROP_DEFS, type CropType, type CropPlot } from '../game/GameState'
+import { CROP_DEFS, type CropType, type CropPlot } from '../GameState'
 
 const STAGE_COLORS: Record<string, string> = {
   empty: 'rgba(255,255,255,0.04)',

@@ -1,5 +1,5 @@
 import { useGameStore } from '../game/GameLoop'
-import type { LogEntry } from '../game/GameState'
+import type { LogEntry } from '../GameState'
 
 const LOG_COLORS: Record<LogEntry['type'], string> = { info: 'var(--text-dim)', warning: 'var(--amber)', danger: '#f87171', success: 'var(--green)' }
 const LOG_PREFIX: Record<LogEntry['type'], string> = { info: '·', warning: '▲', danger: '✕', success: '✓' }

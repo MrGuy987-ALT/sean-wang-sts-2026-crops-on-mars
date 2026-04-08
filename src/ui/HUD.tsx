@@ -1,5 +1,5 @@
 import { useGameStore } from '../game/GameLoop'
-import { FOOD_PER_COLONIST_PER_SOL } from '../game/GameState'
+import { FOOD_PER_COLONIST_PER_SOL } from '../GameState'
 
 function SolProgress() {
   const { solTimer, solDuration, paused } = useGameStore(s => s.state)

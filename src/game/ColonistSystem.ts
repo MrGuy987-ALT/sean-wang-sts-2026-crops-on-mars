@@ -1,5 +1,5 @@
-import type { GameState, ColonistInfo } from './GameState'
-import { FOOD_PER_COLONIST_PER_SOL } from './GameState'
+import type { GameState, ColonistInfo } from '../GameState'
+import { FOOD_PER_COLONIST_PER_SOL } from '../GameState'
 import { addLog } from './GameLoop'
 
 export function tickColonists(state: GameState): GameState {

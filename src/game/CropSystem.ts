@@ -1,5 +1,5 @@
-import type { GameState, CropPlot, CropType, GrowthStage } from './GameState'
-import { CROP_DEFS, FOOD_PER_COLONIST_PER_SOL } from './GameState'
+import type { GameState, CropPlot, CropType, GrowthStage } from '../GameState'
+import { CROP_DEFS, FOOD_PER_COLONIST_PER_SOL } from '../GameState'
 import { addLog } from './GameLoop'
 
 export function plantCrop(state: GameState, plotId: string, cropType: CropType): GameState {

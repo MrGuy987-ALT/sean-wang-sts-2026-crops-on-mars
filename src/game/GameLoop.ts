@@ -3,7 +3,7 @@ import {
   type GameState, type CropType, type UpgradeId, type LogEntry,
   type ActiveEvent, type CropPlot,
   UPGRADE_DEFS, createInitialState, saveGame, loadGame,
-} from './GameState'
+} from '../GameState'
 import { tickCrops, plantCrop, tendPlot, harvestPlot } from './CropSystem'
 import { tickColonists } from './ColonistSystem'
 

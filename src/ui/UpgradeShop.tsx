@@ -1,5 +1,5 @@
 import { useGameStore } from '../game/GameLoop'
-import { UPGRADE_DEFS, type UpgradeId } from '../game/GameState'
+import { UPGRADE_DEFS, type UpgradeId } from '../GameState'
 
 const UPGRADE_ORDER: UpgradeId[] = ['solar_panel','bot_mk1','water_recycler','dome','forcefield','research_lab','trade_rocket','bot_mk2']
 const UPGRADE_ICONS: Record<UpgradeId, string> = {
