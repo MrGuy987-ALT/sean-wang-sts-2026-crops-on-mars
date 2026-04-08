@@ -6,13 +6,15 @@ export function tickColonists(state: GameState): GameState {
   const consumed = state.colonists.count * FOOD_PER_COLONIST_PER_SOL
   const newFood = Math.max(0, state.resources.food - consumed)
   const solsLeft = newFood / (state.colonists.count * FOOD_PER_COLONIST_PER_SOL || 1)
+  const baseProductivity = 1.0 + (state.colonists.productivityBonus ?? 0)
 
   let foodDeficitTier: 0 | 1 | 2 | 3 = 0
-  let productivity = 1.0
-  if (solsLeft <= 0)      { foodDeficitTier = 3; productivity = 0.3 }
-  else if (solsLeft < 3)  { foodDeficitTier = 2; productivity = 0.6 }
-  else if (solsLeft < 7)  { foodDeficitTier = 1; productivity = 0.85 }
+  let deficitFactor = 1.0
+  if (solsLeft <= 0)      { foodDeficitTier = 3; deficitFactor = 0.3 }
+  else if (solsLeft < 3)  { foodDeficitTier = 2; deficitFactor = 0.6 }
+  else if (solsLeft < 7)  { foodDeficitTier = 1; deficitFactor = 0.85 }
 
+  const productivity = Math.max(0.3, baseProductivity * deficitFactor)
   const colonists: ColonistInfo = { ...state.colonists, productivity, foodDeficitTier }
   let s: GameState = { ...state, resources: { ...state.resources, food: newFood }, colonists }
 

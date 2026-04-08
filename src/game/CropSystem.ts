@@ -61,8 +61,8 @@ export function tickCrops(state: GameState): GameState {
     const speedMult = shielded ? 1.2 : 1.0
     const adjustedSols = solsGrowing * speedMult
     let newStage: GrowthStage = plot.stage
-    if (plot.stage === 'seeded' && adjustedSols >= stagesPerCrop && plot.tendedThisSol) newStage = 'growing'
-    else if (plot.stage === 'growing' && adjustedSols >= def.growSols && plot.tendedThisSol) newStage = 'ready'
+    if (plot.stage === 'seeded' && adjustedSols >= stagesPerCrop) newStage = 'growing'
+    else if (plot.stage === 'growing' && adjustedSols >= def.growSols) newStage = 'ready'
     updatedPlots[plot.id] = { ...plot, waterLevel: newWater, nutrientLevel: newNutrient, stage: newStage, tendedThisSol: false }
   }
   return { ...state, plots: updatedPlots }

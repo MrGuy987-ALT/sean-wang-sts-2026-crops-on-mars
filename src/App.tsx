@@ -4,6 +4,7 @@ import { HUD } from './ui/HUD'
 import { CropPanel } from './ui/CropPanel'
 import { EventLog } from './ui/EventLog'
 import { UpgradeShop } from './ui/UpgradeShop'
+import { TradePanel } from './ui/TradePanel'
 
 function GameTicker() {
   const tick = useGameStore(s => s.tick)
@@ -45,9 +46,12 @@ export default function App() {
           <CropPanel />
           <div style={{ height: 40 }} />
         </div>
-        <div style={{ display: 'grid', gridTemplateRows: '1fr 1fr', minHeight: 0, overflow: 'hidden' }}>
+        <div style={{ display: 'grid', gridTemplateRows: '0.8fr 0.6fr 1fr', minHeight: 0, overflow: 'hidden' }}>
           <div style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', overflowY: 'auto', minHeight: 0 }}>
             <UpgradeShop />
+          </div>
+          <div style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', overflowY: 'auto', minHeight: 0 }}>
+            <TradePanel />
           </div>
           <div style={{ overflowY: 'auto', minHeight: 0 }}>
             <EventLog />

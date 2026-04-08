@@ -27,6 +27,7 @@ export interface Dome {
 export interface ColonistInfo {
   count: number
   productivity: number
+  productivityBonus: number
   foodDeficitTier: 0 | 1 | 2 | 3
 }
 
@@ -134,7 +135,7 @@ export function createInitialState(): GameState {
   })
   return {
     sol: 1,
-    colonists: { count: 5, productivity: 1.0, foodDeficitTier: 0 },
+    colonists: { count: 5, productivity: 1.0, productivityBonus: 0, foodDeficitTier: 0 },
     resources: { food: 50, water: 200, nutrients: 100, credits: 1000, power: 0, powerUsed: 0, research: 0 },
     rates: { foodPerSol: -6, waterConsumedPerSol: 40, powerGenerated: 0, powerConsumed: 0, researchPerSol: 0, creditsPerSol: 0 },
     plots,
@@ -154,7 +155,7 @@ export function createInitialState(): GameState {
     researchTier: 1,
     solTimer: 0,
     paused: false,
-    solDuration: 2000,
+    solDuration: 2,
     tradeRocketUnlocked: false,
   }
 }

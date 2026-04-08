@@ -34,6 +34,7 @@ function PlotCard({ plot }: { plot: CropPlot }) {
   const plant = useGameStore(s => s.plant)
   const tend = useGameStore(s => s.tend)
   const harvest = useGameStore(s => s.harvest)
+  const sell = useGameStore(s => s.sellPlot)
   const clearBlight = useGameStore(s => s.clearBlight)
   const researchTier = useGameStore(s => s.state.researchTier)
   const def = plot.cropType ? CROP_DEFS[plot.cropType] : null
@@ -106,7 +107,10 @@ function PlotCard({ plot }: { plot: CropPlot }) {
       {plot.blighted ? (
         <button onClick={() => clearBlight(plot.id)} style={actionBtnStyle('#8a1a1a', '#f87171')}>TREAT (150₹)</button>
       ) : isReady ? (
-        <button onClick={() => harvest(plot.id)} style={actionBtnStyle('#2a4a1a', 'var(--green)')}>HARVEST</button>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+          <button onClick={() => harvest(plot.id)} style={actionBtnStyle('#2a4a1a', 'var(--green)')}>HARVEST</button>
+          <button onClick={() => sell(plot.id)} style={actionBtnStyle('#a8731a', '#fbbf24')}>SELL</button>
+        </div>
       ) : plot.stage === 'empty' ? (
         <button onClick={() => setPicking(true)} style={actionBtnStyle('rgba(255,255,255,0.05)', 'var(--text-dim)')}>+ PLANT</button>
       ) : canTend ? (

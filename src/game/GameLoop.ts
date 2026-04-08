@@ -6,6 +6,7 @@ import {
 } from '../GameState'
 import { tickCrops, plantCrop, tendPlot, harvestPlot } from './CropSystem'
 import { tickColonists } from './ColonistSystem'
+import { sellPlot, sellFood, recruitColonist, investProductivity } from './TradeSystem'
 
 export function addLog(state: GameState, message: string, type: LogEntry['type'] = 'info'): GameState {
   const entry: LogEntry = { sol: state.sol, message, type, timestamp: Date.now() }
@@ -129,6 +130,10 @@ interface GameStore {
   plant: (plotId: string, cropType: CropType) => void
   tend: (plotId: string) => void
   harvest: (plotId: string) => void
+  sellPlot: (plotId: string) => void
+  sellFood: (kg: number) => void
+  recruitColonist: () => void
+  investProductivity: () => void
   buyUpgrade: (id: UpgradeId) => void
   repairUpgrade: (id: UpgradeId) => void
   tick: (deltaSeconds: number) => void
@@ -143,6 +148,10 @@ export const useGameStore = create<GameStore>((set) => ({
   plant: (plotId, cropType) => set(s => ({ state: plantCrop(s.state, plotId, cropType) })),
   tend: (plotId) => set(s => ({ state: tendPlot(s.state, plotId) })),
   harvest: (plotId) => set(s => ({ state: harvestPlot(s.state, plotId) })),
+  sellPlot: (plotId) => set(s => ({ state: sellPlot(s.state, plotId) })),
+  sellFood: (kg) => set(s => ({ state: sellFood(s.state, kg) })),
+  recruitColonist: () => set(s => ({ state: recruitColonist(s.state) })),
+  investProductivity: () => set(s => ({ state: investProductivity(s.state) })),
 
   clearBlight: (plotId) => set(s => {
     const state = s.state
@@ -234,9 +243,13 @@ export const useGameStore = create<GameStore>((set) => ({
 
   tick: (deltaSeconds) => set(s => {
     if (s.state.paused) return s
-    const newTimer = s.state.solTimer + deltaSeconds
-    if (newTimer >= s.state.solDuration) return { state: runSolTick(s.state) }
-    return { state: { ...s.state, solTimer: newTimer } }
+    let newTimer = s.state.solTimer + deltaSeconds
+    let nextState = s.state
+    while (newTimer >= nextState.solDuration) {
+      newTimer -= nextState.solDuration
+      nextState = runSolTick(nextState)
+    }
+    return { state: { ...nextState, solTimer: newTimer } }
   }),
 
   togglePause: () => set(s => ({ state: { ...s.state, paused: !s.state.paused } })),
