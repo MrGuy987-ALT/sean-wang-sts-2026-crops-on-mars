@@ -46,15 +46,15 @@ export default function App() {
           <CropPanel />
           <div style={{ height: 40 }} />
         </div>
-        <div style={{ display: 'grid', gridTemplateRows: '0.8fr 0.6fr 1fr', minHeight: 0, overflow: 'hidden' }}>
+        <div style={{ display: 'grid', gridTemplateRows: '0.8fr 1fr 0.6fr', minHeight: 0, overflow: 'hidden' }}>
           <div style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', overflowY: 'auto', minHeight: 0 }}>
             <UpgradeShop />
           </div>
-          <div style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', overflowY: 'auto', minHeight: 0 }}>
-            <TradePanel />
-          </div>
           <div style={{ overflowY: 'auto', minHeight: 0 }}>
             <EventLog />
+          </div>
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', overflowY: 'auto', minHeight: 0 }}>
+            <TradePanel />
           </div>
         </div>
       </div>

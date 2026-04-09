@@ -25,7 +25,7 @@ export function tickColonists(state: GameState): GameState {
   else if (foodDeficitTier === 3 && state.colonists.foodDeficitTier < 3)
     s = addLog(s, 'STARVATION WARNING: Colonists considering evacuation!', 'danger')
 
-  if (foodDeficitTier === 3 && s.colonists.count > 1 && s.sol % 3 === 0) {
+  if (foodDeficitTier === 3 && s.colonists.count > 2 && s.sol % 6 === 0 && Math.random() < 0.4) {
     s = addLog({
       ...s,
       colonists: { ...s.colonists, count: s.colonists.count - 1 },

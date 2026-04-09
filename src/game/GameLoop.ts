@@ -90,7 +90,7 @@ function tickEvents(state: GameState): GameState {
     else updatedEvents.push({ ...ev, solsRemaining: ev.solsRemaining - 1 })
   }
   s = { ...s, activeEvents: updatedEvents }
-  if (Math.random() < 0.20) s = triggerRandomEvent(s)
+  if (Math.random() < 0.12) s = triggerRandomEvent(s)
   return s
 }
 

@@ -155,7 +155,7 @@ export function createInitialState(): GameState {
     researchTier: 1,
     solTimer: 0,
     paused: false,
-    solDuration: 2,
+    solDuration: 5,
     tradeRocketUnlocked: false,
   }
 }
