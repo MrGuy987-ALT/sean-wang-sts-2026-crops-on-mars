@@ -3,6 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "postbuild": "cp dist/index.html . && cp -r dist/assets .",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
