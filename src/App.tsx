@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useGameStore } from './game/GameLoop'
+import { initDevConsole } from './DevConsole'
 import { HUD } from './ui/HUD'
 import { CropPanel } from './ui/CropPanel'
 import { EventLog } from './ui/EventLog'
@@ -26,6 +27,10 @@ function GameTicker() {
 }
 
 export default function App() {
+  useEffect(() => {
+    initDevConsole()
+  }, [])
+
   return (
     <div style={{
       minHeight: '100vh',
