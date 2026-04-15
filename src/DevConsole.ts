@@ -92,4 +92,5 @@ Dev Console Commands:
 
   ;(window as any).dev = dev
   console.log('Dev console ready! Type: dev.help()')
+  console.warn('Using excessive numbers may cause the game to break. Use with caution. ')
 }
