@@ -1,9 +1,33 @@
 // Developer Console - Exposes debug commands to window.dev
 import { useGameStore } from './game/GameLoop'
 
+const DEV_PASSWORD = 'mars2026'
+
+let isUnlocked = false
+
+function promptAuth() {
+  const input = prompt('Enter dev password:')
+  if (input === DEV_PASSWORD) {
+    isUnlocked = true
+    console.log('Dev console unlocked')
+  } else {
+    console.error('Access denied')
+  }
+}
+
 export function initDevConsole() {
+  // Hard gate
+  if (!isUnlocked) {
+    console.warn('Dev console locked. Run dev.unlock() first.')
+  }
+
   const dev = {
+    unlock: () => {
+      promptAuth()
+    },
+
     setMoney: (amount: number) => {
+      if (!isUnlocked) return console.warn('Locked')
       useGameStore.setState(s => ({
         state: {
           ...s.state,
@@ -14,6 +38,7 @@ export function initDevConsole() {
     },
 
     setDay: (day: number) => {
+      if (!isUnlocked) return console.warn('Locked')
       useGameStore.setState(s => ({
         state: { ...s.state, sol: day }
       }))
@@ -21,6 +46,7 @@ export function initDevConsole() {
     },
 
     setWater: (amount: number) => {
+      if (!isUnlocked) return console.warn('Locked')
       useGameStore.setState(s => ({
         state: {
           ...s.state,
@@ -31,6 +57,7 @@ export function initDevConsole() {
     },
 
     setFood: (amount: number) => {
+      if (!isUnlocked) return console.warn('Locked')
       useGameStore.setState(s => ({
         state: {
           ...s.state,
@@ -41,6 +68,7 @@ export function initDevConsole() {
     },
 
     setPower: (amount: number) => {
+      if (!isUnlocked) return console.warn('Locked')
       useGameStore.setState(s => ({
         state: {
           ...s.state,
@@ -51,6 +79,7 @@ export function initDevConsole() {
     },
 
     setResearch: (amount: number) => {
+      if (!isUnlocked) return console.warn('Locked')
       useGameStore.setState(s => ({
         state: {
           ...s.state,
@@ -61,6 +90,7 @@ export function initDevConsole() {
     },
 
     setColonists: (count: number) => {
+      if (!isUnlocked) return console.warn('Locked')
       useGameStore.setState(s => ({
         state: {
           ...s.state,
@@ -71,26 +101,28 @@ export function initDevConsole() {
     },
 
     getState: () => {
+      if (!isUnlocked) return console.warn('Locked')
       return useGameStore.getState().state
     },
 
     help: () => {
       console.log(`
 Dev Console Commands:
-  dev.setMoney(amount)      - Set credits
-  dev.setDay(day)           - Set current sol
-  dev.setWater(amount)      - Set water
-  dev.setFood(amount)       - Set food
-  dev.setPower(amount)      - Set power generation
-  dev.setResearch(amount)   - Set research points
-  dev.setColonists(count)   - Set colonist count
-  dev.getState()            - Get current game state
-  dev.help()                - Show this help
+  dev.unlock()              - Unlock dev tools
+  dev.setMoney(amount)
+  dev.setDay(day)
+  dev.setWater(amount)
+  dev.setFood(amount)
+  dev.setPower(amount)
+  dev.setResearch(amount)
+  dev.setColonists(count)
+  dev.getState()
+  dev.help()
       `)
     }
   }
 
   ;(window as any).dev = dev
-  console.log('Dev console ready! Type: dev.help()')
-  console.warn('Using excessive numbers may cause the game to break. Use with caution. ')
+
+  console.log('Dev console loaded. Run dev.help()')
 }
