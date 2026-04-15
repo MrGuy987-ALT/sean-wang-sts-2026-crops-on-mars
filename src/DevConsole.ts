@@ -37,6 +37,17 @@ export function initDevConsole() {
       console.log(`Credits set to ${amount}`)
     },
 
+    addMoney: (amount: number) => {
+      if (!isUnlocked) return console.warn('Locked')
+      useGameStore.setState(s => ({
+        state: {
+          ...s.state,
+          resources: { ...s.state.resources, credits: s.state.resources.credits + amount }
+        }
+      }))
+      console.log(`Added ${amount} credits`)
+    },
+
     setDay: (day: number) => {
       if (!isUnlocked) return console.warn('Locked')
       useGameStore.setState(s => ({
