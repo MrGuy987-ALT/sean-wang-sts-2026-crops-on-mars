@@ -119,7 +119,7 @@ export function initDevConsole() {
     help: () => {
       console.log(`
 Dev Console Commands:
-  dev.unlock()              - Unlock dev tools
+  dev.unlock()              - Unlock dev tools - Password required. 
   dev.setMoney(amount)
   dev.setDay(day)
   dev.setWater(amount)
